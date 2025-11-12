@@ -5,7 +5,6 @@ Ingests, digests, and suggests paths based on Word documents in the repository.
 """
 
 import re
-import sys
 from pathlib import Path
 from typing import List, Dict, Any
 from docx import Document
