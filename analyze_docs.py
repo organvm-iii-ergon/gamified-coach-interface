@@ -4,7 +4,6 @@ Document Analysis System
 Ingests, digests, and suggests paths based on Word documents in the repository.
 """
 
-import os
 import re
 import sys
 from pathlib import Path
@@ -69,7 +68,7 @@ class DocumentAnalyzer:
             # Extract key information
             doc_analysis = {
                 'num_paragraphs': doc_data['num_paragraphs'],
-                'word_count': len(text.split()),
+                'word_count': len(re.findall(r'\b\w+\b', text)),
                 'key_topics': self._extract_key_topics(text),
                 'summary': self._create_summary(paragraphs[:3])  # First 3 paragraphs
             }
@@ -273,14 +272,6 @@ class DocumentAnalyzer:
 
 def main():
     """Main entry point for the document analyzer."""
-    # Check if python-docx is installed
-    try:
-        import docx
-    except ImportError:
-        print("Error: python-docx is not installed.")
-        print("Please install it using: pip install -r requirements.txt")
-        sys.exit(1)
-    
     # Get the script directory or use current directory
     base_dir = Path(__file__).parent if '__file__' in globals() else Path.cwd()
     
