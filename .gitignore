@@ -23,3 +23,11 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Documents (large binary files)
+*.docx
+*.doc
+*.pdf
+
+# Cache directories
+.doc_analysis_cache/

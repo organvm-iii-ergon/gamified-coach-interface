@@ -930,6 +930,7 @@
                 sessionStart: Date.now(),
                 sessionCount: 0,
                 queryCount: 0,
+                uptimeIntervalId: null,
                 trainingProgress: {
                     positioning: false,
                     monetization: false,
@@ -1688,23 +1689,35 @@
 
                 quizContainer.innerHTML = html;
 
-                // Add click handlers to options
-                document.querySelectorAll('.quiz-option').forEach(option => {
-                    option.addEventListener('click', function() {
-                        const question = this.dataset.question;
-                        document.querySelectorAll(`[data-question="${question}"]`).forEach(opt => {
-                            opt.classList.remove('bg-gray-200');
-                        });
-                        this.classList.add('bg-gray-200');
-                    });
+                // Use event delegation for better performance and to prevent memory leaks
+                // Remove any existing listener first
+                const quizQuestionsEl = document.getElementById('quiz-questions');
+                if (quizQuestionsEl) {
+                    // Clone and replace to remove all event listeners
+                    const newQuizQuestionsEl = quizQuestionsEl.cloneNode(true);
+                    quizQuestionsEl.parentNode.replaceChild(newQuizQuestionsEl, quizQuestionsEl);
 
-                    option.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            this.click();
+                    // Add single delegated event listener for clicks
+                    newQuizQuestionsEl.addEventListener('click', function(e) {
+                        const option = e.target.closest('.quiz-option');
+                        if (option) {
+                            const question = option.dataset.question;
+                            newQuizQuestionsEl.querySelectorAll(`[data-question="${question}"]`).forEach(opt => {
+                                opt.classList.remove('bg-gray-200');
+                            });
+                            option.classList.add('bg-gray-200');
                         }
                     });
-                });
+
+                    // Add single delegated event listener for keyboard
+                    newQuizQuestionsEl.addEventListener('keydown', function(e) {
+                        const option = e.target.closest('.quiz-option');
+                        if (option && (e.key === 'Enter' || e.key === ' ')) {
+                            e.preventDefault();
+                            option.click();
+                        }
+                    });
+                }
 
                 this.playBeep(770, 0.08);
             },
@@ -1944,14 +1957,27 @@
                 const uptimeEl = document.getElementById('uptime');
                 if (!uptimeEl) return;
 
-                setInterval(() => {
+                // Clear existing interval if any
+                if (this.state.uptimeIntervalId) {
+                    clearInterval(this.state.uptimeIntervalId);
+                }
+
+                this.state.uptimeIntervalId = setInterval(() => {
                     const elapsed = Date.now() - this.state.sessionStart;
                     const hours = Math.floor(elapsed / 3600000);
                     const minutes = Math.floor((elapsed % 3600000) / 60000);
                     const seconds = Math.floor((elapsed % 60000) / 1000);
-                    
+
                     uptimeEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 }, 1000);
+            },
+
+            // Cleanup method for when page is unloaded
+            cleanup() {
+                if (this.state.uptimeIntervalId) {
+                    clearInterval(this.state.uptimeIntervalId);
+                    this.state.uptimeIntervalId = null;
+                }
             },
 
             // Add recent activity
@@ -2012,6 +2038,7 @@
 
         // Global cleanup on page unload
         window.addEventListener('beforeunload', () => {
+            LegionOS.cleanup();
             LegionOS.saveUserData();
         });
     </script>
