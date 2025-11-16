@@ -5,6 +5,7 @@ Ingests, digests, and suggests paths based on Word documents in the repository.
 """
 
 import re
+import sys
 from pathlib import Path
 from typing import List, Dict, Any
 from docx import Document
@@ -15,6 +16,9 @@ class DocumentAnalyzer:
     
     def __init__(self, base_dir: str = "."):
         self.base_dir = Path(base_dir)
+        if not self.base_dir.exists() or not self.base_dir.is_dir():
+            print(f"Error: The base directory '{self.base_dir}' does not exist or is not a directory.")
+            sys.exit(1)
         self.documents: Dict[str, Any] = {}
         
     def ingest_docs(self) -> List[str]:
@@ -30,6 +34,7 @@ class DocumentAnalyzer:
             f for f in self.base_dir.glob("**/*.docx")
             if not any(part.startswith('.') or part.startswith('~$') for part in f.parts)
         ]
+        docx_files = list(self.base_dir.glob("*.docx"))
         ingested = []
         
         for docx_file in docx_files:
@@ -40,11 +45,17 @@ class DocumentAnalyzer:
                     'document': doc,
                     'paragraphs': [p.text for p in doc.paragraphs if p.text.strip()],
                     'num_paragraphs': len([p for p in doc.paragraphs if p.text.strip()])
+                paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+                self.documents[docx_file.name] = {
+                    'path': docx_file,
+                    'paragraphs': paragraphs,
+                    'num_paragraphs': len(paragraphs)
                 }
                 ingested.append(docx_file.name)
                 print(f"✓ Ingested: {docx_file.name}")
             except Exception as e:
                 print(f"✗ Failed to ingest {docx_file.name}: {e}")
+                print(f"✗ Failed to ingest {docx_file.name}: {type(e).__name__}: {e}")
         
         print(f"\nTotal documents ingested: {len(ingested)}")
         return ingested
@@ -53,6 +64,21 @@ class DocumentAnalyzer:
         """
         Digest the ingested documents by analyzing their content.
         Returns a summary of the analysis.
+        
+        Returns:
+            Dict[str, Any]: A summary of the analysis with the following structure:
+                {
+                    'total_documents': int,  # Total number of ingested documents
+                    'documents': {
+                        <doc_name>: {
+                            'num_paragraphs': int,      # Number of paragraphs in the document
+                            'word_count': int,          # Total word count in the document
+                            'key_topics': List[str],    # List of key topics extracted from the document
+                            'summary': str              # Brief summary from the first few paragraphs
+                        },
+                        ...
+                    }
+                }
         """
         print("\n" + "=" * 80)
         print("DIGESTING DOCUMENTS")
@@ -72,6 +98,8 @@ class DocumentAnalyzer:
                 'num_paragraphs': doc_data['num_paragraphs'],
                 'word_count': len(re.findall(r'\b\w+\b', text)),
                 'key_topics': self._extract_key_topics(text),
+                'word_count': sum(len(p.split()) for p in paragraphs),
+                'key_topics': self._extract_key_topics(paragraphs),
                 'summary': self._create_summary(paragraphs[:3])  # First 3 paragraphs
             }
             
@@ -100,6 +128,66 @@ class DocumentAnalyzer:
         for word in words:
             if len(word) > 3 and word not in stop_words:
                 word_freq[word] = word_freq.get(word, 0) + 1
+            if doc_analysis['summary']:
+                print(f"   Summary: {doc_analysis['summary']}")
+        
+        return analysis
+    
+    def _extract_key_topics(self, paragraphs: List[str]) -> List[str]:
+        """
+        Extract key topics from text using simple frequency analysis.
+
+        Algorithm:
+        - Converts text to lowercase and splits into words.
+        - Removes punctuation from each word.
+        - Applies basic stemming (removes -ing, -ed, -s suffixes).
+        - Filters out stop words and words with 3 or fewer characters.
+        - Counts the frequency of remaining words.
+        - Returns the top 10 most frequent words as key topics.
+
+        Limitations:
+        - Only considers word frequency; does not use semantic analysis.
+        - May miss multi-word topics or context-specific terms.
+        - Basic stemming may incorrectly modify some words.
+        - The stop word list is static and may not cover all common words.
+        
+        Args:
+            paragraphs (List[str]): List of paragraph texts to analyze.
+            
+        Returns:
+            List[str]: Top 10 most frequent words as key topics.
+        """
+        # Expanded stop words list for better filtering
+        stop_words = {
+            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+            'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'be', 'been',
+            'this', 'that', 'these', 'those', 'it', 'its', 'will', 'can', 'may',
+            'would', 'could', 'should', 'has', 'have', 'had', 'do', 'does', 'did',
+            'they', 'their', 'them', 'we', 'you', 'your', 'our', 'who', 'which',
+            'what', 'when', 'where', 'how', 'all', 'each', 'some', 'more', 'most',
+            'other', 'into', 'through', 'during', 'before', 'after', 'above',
+            'below', 'between', 'under', 'again', 'further', 'then', 'once',
+            'here', 'there', 'than', 'such', 'only', 'very', 'just', 'also',
+            'being', 'both', 'about', 'over', 'any', 'same', 'own', 'while'
+        }
+        
+        # Count word frequencies across all paragraphs
+        word_freq = {}
+        for paragraph in paragraphs:
+            words = paragraph.lower().split()
+            for word in words:
+                # Remove punctuation
+                clean_word = ''.join(c for c in word if c.isalnum())
+                # Apply basic stemming (remove common suffixes)
+                if clean_word.endswith('ing'):
+                    clean_word = clean_word[:-3]
+                elif clean_word.endswith('ed'):
+                    clean_word = clean_word[:-2]
+                elif clean_word.endswith('s') and len(clean_word) > 4:
+                    clean_word = clean_word[:-1]
+                
+                if len(clean_word) > 3 and clean_word not in stop_words:
+                    word_freq[clean_word] = word_freq.get(clean_word, 0) + 1
         
         # Sort by frequency and return top words
         sorted_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)
@@ -110,11 +198,21 @@ class DocumentAnalyzer:
         summary = ' '.join(paragraphs)
         if len(summary) > 300:
             summary = summary[:297] + "..."
+            truncated = summary[:297]
+            # Truncate at the last complete word before the cutoff
+            if ' ' in truncated:
+                truncated = truncated.rsplit(' ', 1)[0]
+            summary = truncated + "..."
         return summary
     
     def suggest_path(self, analysis: Dict[str, Any]) -> None:
         """
         Suggest a development path based on the document analysis.
+        
+        Args:
+            analysis (Dict[str, Any]): Dictionary containing document analysis results.
+                The dictionary must include a 'documents' key mapping to per-document statistics,
+                where each value is a dict with keys such as 'key_topics', 'summary', etc.
         """
         print("\n" + "=" * 80)
         print("SUGGESTED PATH")
@@ -257,6 +355,102 @@ class DocumentAnalyzer:
         
         for i, step in enumerate(next_steps, 1):
             print(f"\n{i}. {step}")
+            # Check for fitness-related terms (considering stemming)
+            if any(word in topics for word in ['fitnes', 'fitness', 'train', 'training', 'workout', 'exercise', 'gym']):
+                fitness_docs.append(doc_name)
+            # Check for business-related terms (considering stemming)
+            if any(word in topics for word in ['busines', 'business', 'enterprise', 'coach', 'coaching', 'model']):
+                business_docs.append(doc_name)
+            # Check for gamification-related terms (considering stemming)
+            if any(word in topics for word in ['gamifi', 'gamified', 'game', 'battl', 'battle', 'quest']):
+                gamification_docs.append(doc_name)
+        
+        print("📋 RECOMMENDED DEVELOPMENT PATH:\n")
+        
+        # Build dynamic path based on detected themes
+        if fitness_docs or business_docs or gamification_docs:
+            print("1. BUILD THE FOUNDATION")
+            print("   └─ Create core data models for fitness coaching")
+            print("   └─ Define user profiles and progress tracking structures")
+            if gamification_docs:
+                print("   └─ Establish gamification mechanics (points, levels, achievements)")
+            
+            if fitness_docs:
+                print("\n2. DEVELOP THE INTERFACE")
+                print("   └─ Design user dashboard with gamified elements")
+                print("   └─ Create workout logging interface")
+                print("   └─ Build progress visualization tools")
+                
+                print("\n3. IMPLEMENT COACHING FEATURES")
+                print("   └─ Personalized workout recommendations")
+                print("   └─ Goal setting and tracking")
+                print("   └─ Motivational messaging system")
+            
+            if gamification_docs:
+                print("\n4. ADD GAMIFICATION LAYER")
+                print("   └─ Achievement system based on milestones")
+                print("   └─ Challenge modes and battle scenarios")
+                print("   └─ Leaderboards and social features")
+            
+            if business_docs:
+                print("\n5. BUSINESS INTEGRATION")
+                print("   └─ Payment and subscription management")
+                print("   └─ Coach-client communication tools")
+                print("   └─ Analytics and reporting dashboard")
+        else:
+            # Default roadmap if no specific themes detected
+            print("1. BUILD THE FOUNDATION")
+            print("   └─ Create core data models for fitness coaching")
+            print("   └─ Define user profiles and progress tracking structures")
+            print("   └─ Establish gamification mechanics (points, levels, achievements)")
+            
+            print("\n2. DEVELOP THE INTERFACE")
+            print("   └─ Design user dashboard with gamified elements")
+            print("   └─ Create workout logging interface")
+            print("   └─ Build progress visualization tools")
+            
+            print("\n3. IMPLEMENT COACHING FEATURES")
+            print("   └─ Personalized workout recommendations")
+            print("   └─ Goal setting and tracking")
+            print("   └─ Motivational messaging system")
+            
+            print("\n4. ADD GAMIFICATION LAYER")
+            print("   └─ Achievement system based on milestones")
+            print("   └─ Challenge modes and battle scenarios")
+            print("   └─ Leaderboards and social features")
+            
+            print("\n5. BUSINESS INTEGRATION")
+            print("   └─ Payment and subscription management")
+            print("   └─ Coach-client communication tools")
+            print("   └─ Analytics and reporting dashboard")
+        
+        print("\n" + "=" * 80)
+        print("DOCUMENT CATEGORIZATION")
+        print("=" * 80)
+        
+        if fitness_docs:
+            print(f"\n💪 Fitness-focused documents ({len(fitness_docs)}):")
+            for doc in fitness_docs:
+                print(f"   - {doc}")
+        
+        if business_docs:
+            print(f"\n💼 Business-focused documents ({len(business_docs)}):")
+            for doc in business_docs:
+                print(f"   - {doc}")
+        
+        if gamification_docs:
+            print(f"\n🎮 Gamification-focused documents ({len(gamification_docs)}):")
+            for doc in gamification_docs:
+                print(f"   - {doc}")
+        
+        print("\n" + "=" * 80)
+        print("NEXT STEPS")
+        print("=" * 80)
+        print("\n1. Review the ingested document content in detail")
+        print("2. Prioritize features based on business requirements")
+        print("3. Create technical specifications for each component")
+        print("4. Set up project structure (frontend, backend, database)")
+        print("5. Begin iterative development with MVP features first")
         
         print("\n✓ Analysis complete!")
     
