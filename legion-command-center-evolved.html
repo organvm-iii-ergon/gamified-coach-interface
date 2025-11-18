@@ -922,6 +922,83 @@
 
     <script>
         // ==================== LEGION OS - CORE SYSTEM ====================
+
+        // Configuration Constants
+        const CONFIG = {
+            ANIMATION: {
+                STAR_COUNT_MOBILE: 25,
+                STAR_COUNT_DESKTOP: 50,
+                PARTICLE_SIZE_MIN: 1,
+                PARTICLE_SIZE_MAX: 4,
+                PARTICLE_SPEED_X_RANGE: 0.5,
+                PARTICLE_SPEED_Y_MIN: 0.2,
+                PARTICLE_SPEED_Y_MAX: 0.7
+            },
+            AUDIO: {
+                DEFAULT_DURATION: 0.1,
+                DEFAULT_TYPE: 'sine'
+            },
+            STORAGE: {
+                KEY: 'legion-os-data'
+            },
+            DEBUG: false  // Set to true for development
+        };
+
+        // Security Utilities
+        const SecurityUtils = {
+            escapeHTML(str) {
+                if (!str) return '';
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            },
+
+            sanitizeInput(input) {
+                if (typeof input !== 'string') return input;
+                return input.trim().substring(0, 1000); // Limit length
+            },
+
+            createSafeElement(tag, attributes = {}, textContent = '') {
+                const element = document.createElement(tag);
+                for (const [key, value] of Object.entries(attributes)) {
+                    if (key === 'className') {
+                        element.className = value;
+                    } else if (key.startsWith('data-')) {
+                        element.setAttribute(key, value);
+                    } else if (key === 'id') {
+                        element.id = value;
+                    }
+                }
+                if (textContent) {
+                    element.textContent = textContent;
+                }
+                return element;
+            }
+        };
+
+        // Logger Utility
+        const Logger = {
+            log(...args) {
+                if (CONFIG.DEBUG) console.log('[LegionOS]', ...args);
+            },
+            warn(...args) {
+                if (CONFIG.DEBUG) console.warn('[LegionOS]', ...args);
+            },
+            error(...args) {
+                console.error('[LegionOS Error]', ...args);
+            }
+        };
+
+        // Global Error Handler
+        window.addEventListener('error', (event) => {
+            Logger.error('Uncaught error:', event.error);
+            // Could send to error tracking service here
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            Logger.error('Unhandled promise rejection:', event.reason);
+        });
+
         const LegionOS = {
             // System state
             state: {
@@ -930,6 +1007,7 @@
                 sessionStart: Date.now(),
                 sessionCount: 0,
                 queryCount: 0,
+                uptimeIntervalId: null,
                 trainingProgress: {
                     positioning: false,
                     monetization: false,
@@ -941,7 +1019,7 @@
 
             // Initialize system
             init() {
-                console.log('🔴 LEGION OS INITIALIZING...');
+                Logger.log('🔴 LEGION OS INITIALIZING...');
                 this.initCanvas();
                 this.initAudio();
                 this.initNavigation();
@@ -949,7 +1027,7 @@
                 this.initUptime();
                 this.loadUserData();
                 this.updateStats();
-                console.log('✅ LEGION OS ONLINE');
+                Logger.log('✅ LEGION OS ONLINE');
             },
 
             // Canvas background animation with cleanup
@@ -977,14 +1055,16 @@
 
                 resizeCanvas();
 
-                // Create stars
-                const starCount = window.innerWidth < 640 ? 25 : 50;
+                // Create stars using CONFIG constants
+                const starCount = window.innerWidth < 640
+                    ? CONFIG.ANIMATION.STAR_COUNT_MOBILE
+                    : CONFIG.ANIMATION.STAR_COUNT_DESKTOP;
                 for (let i = 0; i < starCount; i++) {
                     stars.push({
                         x: Math.random() * canvas.width,
                         y: Math.random() * canvas.height,
-                        size: Math.random() * 2 + 1,
-                        speed: Math.random() * 0.3 + 0.1
+                        size: Math.random() * (CONFIG.ANIMATION.PARTICLE_SIZE_MAX - CONFIG.ANIMATION.PARTICLE_SIZE_MIN) + CONFIG.ANIMATION.PARTICLE_SIZE_MIN,
+                        speed: Math.random() * CONFIG.ANIMATION.PARTICLE_SPEED_X_RANGE + 0.1
                     });
                 }
 
@@ -1024,7 +1104,7 @@
                         if (this.state.audioContext && this.state.audioContext.state === 'suspended') {
                             this.state.audioContext.resume().then(() => {
                                 this.state.audioEnabled = true;
-                                console.log('🔊 Audio enabled');
+                                Logger.log('🔊 Audio enabled');
                             });
                         }
                         document.removeEventListener('click', enableAudio);
@@ -1034,7 +1114,7 @@
                     document.addEventListener('click', enableAudio);
                     document.addEventListener('keydown', enableAudio);
                 } catch (error) {
-                    console.warn('Audio not supported:', error);
+                    Logger.warn('Audio not supported:', error);
                     this.state.audioEnabled = false;
                 }
             },
@@ -1059,7 +1139,7 @@
                     oscillator.start(this.state.audioContext.currentTime);
                     oscillator.stop(this.state.audioContext.currentTime + duration);
                 } catch (error) {
-                    console.warn('Audio playback failed:', error);
+                    Logger.warn('Audio playback failed:', error);
                 }
             },
 
@@ -1147,7 +1227,7 @@
                 const templates = this.getTerminalTemplates();
 
                 if (!templates[terminalId]) {
-                    console.error('Terminal not found:', terminalId);
+                    Logger.error('Terminal not found:', terminalId);
                     return;
                 }
 
@@ -1484,13 +1564,19 @@
 
             // Generate mock response
             generateMockResponse(terminalId, inputs) {
+                // Sanitize all inputs to prevent XSS
+                const safeInputs = {};
+                for (const [key, value] of Object.entries(inputs)) {
+                    safeInputs[key] = SecurityUtils.escapeHTML(SecurityUtils.sanitizeInput(value));
+                }
+
                 const responses = {
                     foundation: `
                         <h4 class="retro-header text-lg mb-3">✅ POSITIONING STRATEGY GENERATED</h4>
                         <div class="space-y-3 terminal-text">
                             <div>
                                 <strong class="text-red-600">Hero Statement:</strong>
-                                <p>"I help [${inputs['foundation-input']?.substring(0, 50) || 'your target audience'}] achieve [specific transformation] through [unique method]."</p>
+                                <p>"I help [${safeInputs['foundation-input']?.substring(0, 50) || 'your target audience'}] achieve [specific transformation] through [unique method]."</p>
                             </div>
                             <div>
                                 <strong class="text-red-600">Key Differentiators:</strong>
@@ -1688,23 +1774,35 @@
 
                 quizContainer.innerHTML = html;
 
-                // Add click handlers to options
-                document.querySelectorAll('.quiz-option').forEach(option => {
-                    option.addEventListener('click', function() {
-                        const question = this.dataset.question;
-                        document.querySelectorAll(`[data-question="${question}"]`).forEach(opt => {
-                            opt.classList.remove('bg-gray-200');
-                        });
-                        this.classList.add('bg-gray-200');
-                    });
+                // Use event delegation for better performance and to prevent memory leaks
+                // Remove any existing listener first
+                const quizQuestionsEl = document.getElementById('quiz-questions');
+                if (quizQuestionsEl) {
+                    // Clone and replace to remove all event listeners
+                    const newQuizQuestionsEl = quizQuestionsEl.cloneNode(true);
+                    quizQuestionsEl.parentNode.replaceChild(newQuizQuestionsEl, quizQuestionsEl);
 
-                    option.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            this.click();
+                    // Add single delegated event listener for clicks
+                    newQuizQuestionsEl.addEventListener('click', function(e) {
+                        const option = e.target.closest('.quiz-option');
+                        if (option) {
+                            const question = option.dataset.question;
+                            newQuizQuestionsEl.querySelectorAll(`[data-question="${question}"]`).forEach(opt => {
+                                opt.classList.remove('bg-gray-200');
+                            });
+                            option.classList.add('bg-gray-200');
                         }
                     });
-                });
+
+                    // Add single delegated event listener for keyboard
+                    newQuizQuestionsEl.addEventListener('keydown', function(e) {
+                        const option = e.target.closest('.quiz-option');
+                        if (option && (e.key === 'Enter' || e.key === ' ')) {
+                            e.preventDefault();
+                            option.click();
+                        }
+                    });
+                }
 
                 this.playBeep(770, 0.08);
             },
@@ -1944,14 +2042,27 @@
                 const uptimeEl = document.getElementById('uptime');
                 if (!uptimeEl) return;
 
-                setInterval(() => {
+                // Clear existing interval if any
+                if (this.state.uptimeIntervalId) {
+                    clearInterval(this.state.uptimeIntervalId);
+                }
+
+                this.state.uptimeIntervalId = setInterval(() => {
                     const elapsed = Date.now() - this.state.sessionStart;
                     const hours = Math.floor(elapsed / 3600000);
                     const minutes = Math.floor((elapsed % 3600000) / 60000);
                     const seconds = Math.floor((elapsed % 60000) / 1000);
-                    
+
                     uptimeEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 }, 1000);
+            },
+
+            // Cleanup method for when page is unloaded
+            cleanup() {
+                if (this.state.uptimeIntervalId) {
+                    clearInterval(this.state.uptimeIntervalId);
+                    this.state.uptimeIntervalId = null;
+                }
             },
 
             // Add recent activity
@@ -1979,19 +2090,19 @@
             // Local storage
             saveUserData() {
                 try {
-                    localStorage.setItem('legion-os-data', JSON.stringify({
+                    localStorage.setItem(CONFIG.STORAGE.KEY, JSON.stringify({
                         queryCount: this.state.queryCount,
                         trainingProgress: this.state.trainingProgress,
                         userData: this.state.userData
                     }));
                 } catch (error) {
-                    console.warn('Could not save to localStorage:', error);
+                    Logger.warn('Could not save to localStorage:', error);
                 }
             },
 
             loadUserData() {
                 try {
-                    const saved = localStorage.getItem('legion-os-data');
+                    const saved = localStorage.getItem(CONFIG.STORAGE.KEY);
                     if (saved) {
                         const data = JSON.parse(saved);
                         this.state.queryCount = data.queryCount || 0;
@@ -2000,7 +2111,7 @@
                         this.updateTrainingProgress();
                     }
                 } catch (error) {
-                    console.warn('Could not load from localStorage:', error);
+                    Logger.warn('Could not load from localStorage:', error);
                 }
             }
         };
@@ -2012,6 +2123,7 @@
 
         // Global cleanup on page unload
         window.addEventListener('beforeunload', () => {
+            LegionOS.cleanup();
             LegionOS.saveUserData();
         });
     </script>
