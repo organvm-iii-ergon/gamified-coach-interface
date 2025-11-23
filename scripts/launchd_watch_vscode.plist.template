@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!-- Replace REPO_ABSOLUTE_PATH with the absolute path to your repo -->
+    <!-- Replace WATCH_PATH with the path to watch (e.g. /Volumes/YourDrive or /Users/4jp/dot-files) -->
+    <key>Label</key>
+    <string>com.user.manage_vscode_extensions.watch</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/bash</string>
+      <string>REPO_ABSOLUTE_PATH/scripts/manage_vscode_extensions.sh</string>
+      <string>create</string>
+      <string>--source</string>
+      <string>$HOME/dot-files/.vscode-insiders/extensions</string>
+      <string>--target</string>
+      <string>$HOME/.vscode-insiders/extensions</string>
+      <string>--wait</string>
+      <string>300</string>
+      <string>--wait-interval</string>
+      <string>10</string>
+    </array>
+    <!-- KeepAlive false; we'll run on changes to WatchPaths -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>WatchPaths</key>
+    <array>
+      <string>WATCH_PATH</string>
+    </array>
+    <key>StandardOutPath</key>
+    <string>$HOME/Library/Logs/manage_vscode_extensions_watch.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>$HOME/Library/Logs/manage_vscode_extensions_watch.err.log</string>
+  </dict>
+</plist>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!-- Replace REPO_ABSOLUTE_PATH with the absolute path to your repo, e.g. /Users/4jp/Development/organization/gamified-coach-interface -->
+    <key>Label</key>
+    <string>com.user.manage_vscode_extensions</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/bin/bash</string>
+      <string>REPO_ABSOLUTE_PATH/scripts/manage_vscode_extensions.sh</string>
+      <string>create</string>
+      <string>--source</string>
+      <string>$HOME/dot-files/.vscode-insiders/extensions</string>
+      <string>--target</string>
+      <string>$HOME/.vscode-insiders/extensions</string>
+      <!-- Optional wait placeholders: replace WAIT_SECONDS and WAIT_INTERVAL when installing -->
+      <string>--wait</string>
+      <string>WAIT_SECONDS</string>
+      <string>--wait-interval</string>
+      <string>WAIT_INTERVAL</string>
+    </array>
+    <!-- Run at login for the user -->
+    <key>RunAtLoad</key>
+    <true/>
+    <!-- Also run periodically in case something moves the folder; interval in seconds -->
+    <key>StartInterval</key>
+    <integer>3600</integer>
+    <key>StandardOutPath</key>
+    <string>$HOME/Library/Logs/manage_vscode_extensions.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>$HOME/Library/Logs/manage_vscode_extensions.err.log</string>
+  </dict>
+</plist>

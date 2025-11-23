@@ -1,9 +1,12 @@
 {
   "folders": [
-	{
-		"path": "."
-	}
-],
+    {
+      "path": "."
+    },
+    {
+      "path": "../../../../../Volumes/ivi3t4forms"
+    }
+  ],
   "settings": {
     "explorerExclude.backup": {}
   }
