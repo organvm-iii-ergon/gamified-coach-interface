@@ -1,123 +1,223 @@
-# Gamified Coach Interface
+# Gamified Coach Interface - Legion Command Center
 
-A fitness coaching platform with gamification elements, designed to help coaches engage clients through battle-themed interfaces and achievement systems.
+A comprehensive gamified fitness coaching platform featuring:
+- **V3 Holographic Interface**: Three.js-powered 3D command center with AI integration
+- **V2 Retro Interface**: Pixel RPG-style coaching dashboard
+- **Document Analysis System**: Python-based strategic document ingestion and analysis
 
-## Project Structure
+## 🚀 Quick Start - Legion Command Center V3
 
-```
-.
-├── docs/                          # Documentation
-│   ├── source-documents/          # Original Word documents with business plans and specs
-│   ├── design-specs/              # Technical design specifications
-│   └── research/                  # Research notes and analysis
-├── prototypes/                    # HTML prototypes and mockups
-├── scripts/                       # Utility scripts
-│   └── analyze_docs.py           # Document analysis tool
-├── requirements.txt              # Python dependencies
-└── README.md                     # This file
-```
+### Requirements
 
-## Overview
+- Node.js 18+ and npm
+- Modern web browser with WebGL support
+- (Optional) Gemini API key for AI-powered strategy generation
 
-This repository contains resources for developing a gamified fitness coaching interface. The system analyzes documentation, provides development recommendations, and includes interface prototypes.
-
-### Document Analysis System
-
-The analyzer ingests Word documents and provides:
-
-- **Document Ingestion**: Reads and loads all Word documents in the repository
-- **Document Digestion**: Analyzes content, extracts key topics, and generates summaries
-- **Path Suggestion**: Recommends development paths based on document content
-
-## Requirements
-
-- Python 3.8+
-- python-docx library
-
-## Installation
+### Installation
 
 1. Clone the repository:
-
 ```bash
 git clone https://github.com/ivi374forivi/gamified-coach-interface.git
 cd gamified-coach-interface
 ```
 
-2. Create and activate a virtual environment:
-
+2. Install dependencies:
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+npm install
 ```
 
-3. Install dependencies:
+3. Start the development server:
+```bash
+npm run dev
+```
 
+4. Open your browser to `http://localhost:3000/legion-v3.html`
+
+### Features
+
+**Legion Command Center V3** - Neo-brutalist holographic interface:
+- 🎮 **Interactive 3D Scene**: Strategy Core with orbital navigation nodes
+- 🤖 **AI Strategy Generation**: Gemini API integration for business analysis
+- 🎨 **Holographic Design**: Blade Runner 2049-inspired aesthetics
+- 📊 **Strategy Forge**: AI-powered target analysis and business planning
+- 🗺️ **Multi-Module System**: Intel visualization, field ops, training, archive
+
+## 🎯 Using Legion Command Center V3
+
+### First Time Setup
+
+1. **Boot Sequence**: On first load, you'll see the LEGION OS boot screen
+2. **3D Interface**: After boot, you'll see the Strategy Core (central holographic object) with 5 orbital nodes
+3. **Navigation**: Click on orbital nodes or use the bottom menu to access different modules
+
+### Modules Overview
+
+1. **TARGET ANALYSIS** (Cyan Node)
+   - Primary strategy forge for business planning
+   - AI-powered analysis of target avatars and transformation goals
+   - Requires Gemini API key for full functionality
+   - Fallback analysis available without API key
+
+2. **INTEL VISUALIZATION** (Orange Node)
+   - Market landscape and competitive analysis
+   - Visual data mapping (under development)
+
+3. **FIELD OPERATIONS** (Green Node)
+   - Operational dashboard
+   - Client and mission tracking (under development)
+
+4. **TRAINING PROTOCOLS** (Blue Node)
+   - Knowledge base and training modules
+   - Business strategy education (under development)
+
+5. **DATA ARCHIVE** (Grey Node)
+   - Access to analyzed strategic documents
+   - Reference materials and frameworks
+
+### API Configuration
+
+To enable AI-powered strategy generation:
+
+1. Get a Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Click on **TARGET ANALYSIS** node
+3. Fill out the strategy parameters
+4. Click **INITIATE STRATEGIC ANALYSIS**
+5. When prompted, enter your API key (saved locally for future sessions)
+
+### Keyboard Shortcuts
+
+- `ESC` - Close active terminal/modal
+- Click anywhere on nodes or menu items to navigate
+
+## 🏗️ Project Structure
+
+```
+gamified-coach-interface/
+├── legion-v3.html          # V3 Main HTML (holographic interface)
+├── index.html              # V2 Command center (retro interface)
+├── client.html             # V2 Client-facing interface
+├── src/
+│   ├── main.js            # V3 Main application logic
+│   ├── SceneManager.js    # Three.js scene management
+│   ├── StrategyCore.js    # Central 3D holographic object
+│   └── OrbitalNodes.js    # Navigation node system
+├── analyze_docs.py         # Python document analyzer
+├── package.json           # Node.js dependencies
+├── vite.config.js         # Vite build configuration
+└── *.docx                 # Strategic documents
+
+```
+
+## 🛠️ Build for Production
+
+To create a production build:
+
+```bash
+npm run build
+```
+
+This will generate optimized files in the `dist/` directory.
+
+To preview the production build:
+
+```bash
+npm run preview
+```
+
+## 📖 Python Document Analysis
+
+### Requirements
+
+- Python 3.11+
+- python-docx library
+
+### Installation
+
+1. Clone the repository (if not already done):
+```bash
+git clone https://github.com/ivi374forivi/gamified-coach-interface.git
+cd gamified-coach-interface
+```
+
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
 ## Usage
 
-### Running the Document Analyzer
-
-Analyze project documentation to extract key topics and generate development recommendations:
+Run the document analyzer:
 
 ```bash
-python scripts/analyze_docs.py
+python3 analyze_docs.py
 ```
 
 The script will:
-
-1. Scan for `.docx` files in `docs/source-documents/`
+1. Scan the repository for `.docx` files
 2. Ingest and parse each document
-3. Analyze content to extract key topics and statistics
-4. Provide categorization and suggested development paths
-
-### Viewing Prototypes
-
-HTML prototypes are located in the `prototypes/` directory. Open them in a web browser to preview interface designs.
+3. Analyze the content to extract key topics and statistics
+4. Provide a suggested development path based on the analysis
 
 ## Output
 
 The analyzer provides:
-
 - List of ingested documents
 - Document statistics (paragraph count, word count)
 - Key topics extracted from each document
-- Categorization (fitness, business, gamification themes)
+- Categorization of documents (fitness, business, gamification themes)
 - Recommended development path with actionable steps
 - Suggested next steps for implementation
 
-## Documentation
+## Documents in Repository
 
-- **Source Documents** (`docs/source-documents/`): Business plans, conceptual documents
-  - Blueprint for a Niche Fitness Coaching Enterprise
-  - Gym Chimera
-  - The Gamified Life
-  - The Legion of Fitness
-- **Design Specs** (`docs/design-specs/`): Technical specifications
-- **Research** (`docs/research/`): Market research and application drafts
+The repository contains several key documents:
+- **Blueprint for a Niche Fitness Coaching Enterprise**: Deep dive into the Gamified Life Model
+- **Gym Chimera**: Specific fitness coaching concepts
+- **The Gamified Life**: Formal and casual perspective on gamification
+- **The Legion of Fitness**: Battle plan and interrogation strategies
 
-## Development Roadmap
+## Development Path
 
-The recommended phases (generated dynamically from document analysis):
+## Development Path
 
-1. **Foundation**: Core data models for fitness coaching and user profiles
-2. **Interface**: User dashboard with gamified elements
-3. **Coaching Features**: Personalized recommendations and progress tracking
-4. **Gamification**: Achievement system, challenges, and leaderboards
-5. **Business Integration**: Payment systems, analytics, and coach tools
+The recommended development phases are generated dynamically based on the content and themes found in the analyzed documents. The system identifies relevant topics and suggests actionable phases accordingly.
+
+For example:
+- If a document focuses only on fitness, the suggested phases may include:
+  1. **Foundation**: Core data models and user profiles
+  2. **Interface**: User dashboard and tracking tools
+  3. **Coaching Features**: Personalized recommendations and goal tracking
+- If business or gamification topics are present, additional phases such as **Gamification** and **Business Integration** may be included.
+
+Possible phases include:
+- **Foundation**: Core data models and user profiles
+- **Interface**: User dashboard and tracking tools
+- **Coaching Features**: Personalized recommendations and goal tracking
+- **Gamification**: Achievement systems and challenges
+- **Business Integration**: Payments, communication, and analytics
+Based on the document analysis, the recommended development phases are:
+
+1. **Foundation**: Core data models and user profiles
+2. **Interface**: User dashboard and tracking tools
+3. **Coaching Features**: Personalized recommendations and goal tracking
+4. **Gamification**: Achievement systems and challenges
+5. **Business Integration**: Payments, communication, and analytics
 
 ## Contributing
 
-This is a private project. If you have access and want to contribute:
+This is a document analysis tool for the gamified fitness coaching interface project. To contribute:
 
-1. Ensure Python 3.8+ is installed
+1. Ensure Python 3.11+ is installed
 2. Install dependencies: `pip install -r requirements.txt`
 3. Make your changes
-4. Test the analysis script: `python scripts/analyze_docs.py`
+4. Test the analysis script: `python3 analyze_docs.py`
 5. Submit a pull request
 
 ## License
 
-Private/Proprietary - No public license currently included.
+See repository license file for details.
+No license file is currently included in this repository. Please contact the repository owner for licensing information.
+
+## Contact
+
+For questions or suggestions about the document analysis system, please open an issue in the repository.
