@@ -29,3 +29,11 @@ Thumbs.db
 
 # Aliases
 GEMINI.md alias
+
+# Documents (large binary files)
+*.docx
+*.doc
+*.pdf
+
+# Cache directories
+.doc_analysis_cache/
