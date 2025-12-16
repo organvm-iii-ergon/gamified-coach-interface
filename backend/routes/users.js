@@ -7,4 +7,7 @@ const { authenticate } = require('../middleware/auth');
 router.post('/xp/award', authenticate, gamificationController.awardXP);
 router.get('/xp/history', authenticate, gamificationController.getXPHistory);
 
+// Onboarding routes
+router.post('/onboarding', authenticate, gamificationController.saveOnboarding);
+
 module.exports = router;

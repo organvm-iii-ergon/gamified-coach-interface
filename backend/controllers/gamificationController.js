@@ -390,6 +390,62 @@ exports.unlockSkill = async (req, res, next) => {
 };
 
 // ============================================
+// ONBOARDING
+// ============================================
+
+/**
+ * @desc    Save user onboarding preferences
+ * @route   POST /api/v1/users/onboarding
+ * @access  Private
+ */
+exports.saveOnboarding = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { role, gamificationStyle, gamificationTheme } = req.body;
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
+    // Update user fields
+    if (role) user.role = role; // Note: In a real app, changing role might require more checks
+    if (gamificationStyle) user.gamification_style = gamificationStyle;
+    if (gamificationTheme) user.gamification_theme = gamificationTheme;
+    user.onboarding_completed = true;
+
+    await user.save();
+
+    await trackEvent({
+      userId,
+      eventType: 'onboarding_completed',
+      properties: {
+        role,
+        style: gamificationStyle,
+        theme: gamificationTheme
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Onboarding completed successfully',
+      data: {
+        user: {
+          id: user.id,
+          role: user.role,
+          gamificationStyle: user.gamification_style,
+          gamificationTheme: user.gamification_theme,
+          onboardingCompleted: user.onboarding_completed
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ============================================
 // XP & LEVELING
 // ============================================
 

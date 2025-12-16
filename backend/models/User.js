@@ -66,6 +66,20 @@ const User = sequelize.define('User', {
     defaultValue: 'Recruit'
   },
 
+  // Onboarding & Preferences
+  gamification_style: {
+    type: DataTypes.ENUM('sports', 'rpg', 'platformer', 'fps', 'strategy', 'racing'),
+    defaultValue: 'rpg'
+  },
+  gamification_theme: {
+    type: DataTypes.STRING(100),
+    defaultValue: 'cyberpunk'
+  },
+  onboarding_completed: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+
   // Subscription
   subscription_tier: {
     type: DataTypes.ENUM('free', 'potion', 'core_quest', 'raid', 'mastermind'),
