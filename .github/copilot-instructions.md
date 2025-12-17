@@ -35,5 +35,12 @@ Follow PEP 8 guidelines.
 
 ## WORKFLOW & RELEASE RULES
 
+- Before starting any task, review the current repository structure and key documentation.
+- When starting a new task, begin by gathering context by reading the README.
+- Perform moves in small PRs to keep diffs reviewable.
+- Update import paths and Vite root when relocating the frontend app.
+- After moving docs, update README links to the new locations.
+- Keep `prototypes/` read-only until feature parity is confirmed in `apps/frontend`.
+
 ## BEST PRACTICES
 - Frontend environment variables should be stored in `.env` at the root of the repository. This file should include placeholders for `VITE_GEMINI_API_KEY`, `VITE_BACKEND_URL`, and `VITE_APP_PORT`.
