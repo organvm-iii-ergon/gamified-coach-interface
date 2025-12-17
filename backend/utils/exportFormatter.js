@@ -11,6 +11,7 @@ function normalizeWorkspace(workspace) {
     try {
       parsedData = JSON.parse(parsedData);
     } catch (error) {
+      console.warn(`[exportFormatter] Failed to parse workspace data for ID ${workspace.id}. Using raw data.`);
       parsedData = workspace.data;
     }
   }
@@ -34,7 +35,18 @@ function renderMarkdownFromData(data, depth = 0) {
 
   if (Array.isArray(data)) {
     if (data.length === 0) return `${indent}- (empty)\n`;
-    return data.map(item => `${indent}- ${formatValue(item)}\n`).join('');
+    return data
+      .map(item => {
+        // For plain objects, recurse to preserve nested structure in Markdown
+        if (item && typeof item === 'object' && !Array.isArray(item)) {
+          const nested = renderMarkdownFromData(item, depth + 1);
+          return `${indent}-\n${nested}`;
+        }
+
+        // For primitives and non-object values, keep inline formatting
+        return `${indent}- ${formatValue(item)}\n`;
+      })
+      .join('');
   }
 
   if (typeof data === 'object' && data !== null) {
@@ -65,7 +77,13 @@ function workspaceToMarkdown(workspace) {
 }
 
 function renderPdfSection(doc, data, depth = 0) {
+  const MAX_DEPTH = 20; // Prevent stack overflow on deeply nested data
   const indent = ' '.repeat(depth * 2);
+
+  if (depth > MAX_DEPTH) {
+    doc.text(`${indent}[Max nesting depth reached]`);
+    return;
+  }
 
   if (Array.isArray(data)) {
     if (data.length === 0) {
@@ -99,22 +117,30 @@ function renderPdfSection(doc, data, depth = 0) {
 }
 
 function streamWorkspacePdf(workspace, res) {
-  const doc = new PDFDocument({ margin: 50 });
-  doc.pipe(res);
+  try {
+    const doc = new PDFDocument({ margin: 50 });
+    doc.pipe(res);
 
-  doc.fontSize(18).text(`Strategy Workspace: ${workspace.name || 'Untitled'}`, { underline: true });
-  doc.moveDown(0.5);
-  doc.fontSize(12).text(`Workspace ID: ${workspace.id}`);
-  doc.text(`Terminal Type: ${workspace.terminal_type}`);
-  doc.text(`Exported At: ${workspace.exported_at || new Date().toISOString()}`);
+    doc.fontSize(18).text(`Strategy Workspace: ${workspace.name || 'Untitled'}`, { underline: true });
+    doc.moveDown(0.5);
+    doc.fontSize(12).text(`Workspace ID: ${workspace.id}`);
+    doc.text(`Terminal Type: ${workspace.terminal_type}`);
+    doc.text(`Exported At: ${workspace.exported_at || new Date().toISOString()}`);
 
-  doc.moveDown();
-  doc.fontSize(14).text('Strategy Data', { underline: true });
-  doc.moveDown(0.5);
-  doc.fontSize(11);
-  renderPdfSection(doc, workspace.data || {}, 0);
+    doc.moveDown();
+    doc.fontSize(14).text('Strategy Data', { underline: true });
+    doc.moveDown(0.5);
+    doc.fontSize(11);
+    renderPdfSection(doc, workspace.data || {}, 0);
 
-  doc.end();
+    doc.end();
+  } catch (error) {
+    console.error('[exportFormatter] PDF generation failed:', error);
+    // If response hasn't started, send error; otherwise, error is already logged
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: 'PDF generation failed' });
+    }
+  }
 }
 
 module.exports = {

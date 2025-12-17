@@ -530,6 +530,7 @@
         <div class="noscript-fallback">
             <div class="notice-title">LEGION // LOW-FIDELITY MODE</div>
             <p>If JavaScript is disabled, you can still request a tactical brief.</p>
+            <!-- Note: API version hardcoded to v1 since this is static HTML -->
             <form method="post" action="/api/v1/strategy/offline">
                 <label for="offline-target-avatar">Target Avatar</label>
                 <textarea id="offline-target-avatar" name="targetAvatar" required placeholder="Describe your ideal client..."></textarea>
@@ -543,7 +544,7 @@
                 <button type="submit">Generate Offline Brief</button>
             </form>
             <div class="notice-links">
-                Export saved workspaces at <code>/api/v1/strategy/workspaces/&lt;workspace_id&gt;/export?format=markdown</code> or <code>format=pdf</code>.
+                Export saved workspaces at <code>/api/v1/strategy/workspaces/{workspace_id}/export?format=markdown</code> or <code>format=pdf</code>.
             </div>
         </div>
     </noscript>

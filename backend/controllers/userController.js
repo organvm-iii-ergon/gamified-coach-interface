@@ -37,7 +37,7 @@ exports.exportUserData = async (req, res, next) => {
         subscription_tier,
         subscription_start_date,
         subscription_end_date,
-        stripe_customer_id,
+        -- stripe_customer_id excluded for security (sensitive payment info)
         last_login,
         login_streak,
         longest_streak,
@@ -52,13 +52,19 @@ exports.exportUserData = async (req, res, next) => {
       throw new AppError('User not found', 404, 'USER_NOT_FOUND');
     }
 
+    // Queries with LIMIT clauses to prevent unbounded exports and performance issues
     const queries = {
       profile: 'SELECT * FROM user_profiles WHERE user_id = :userId',
       achievements: 'SELECT * FROM user_achievements WHERE user_id = :userId',
       skills: 'SELECT * FROM user_skills WHERE user_id = :userId',
       quests: 'SELECT * FROM user_quests WHERE user_id = :userId',
       habits: 'SELECT * FROM habits WHERE user_id = :userId',
-      habitCompletions: 'SELECT * FROM habit_completions WHERE user_id = :userId',
+      habitCompletions: `
+        SELECT * FROM habit_completions 
+        WHERE user_id = :userId 
+        ORDER BY completed_at DESC 
+        LIMIT 10000
+      `,
       guildMemberships: 'SELECT * FROM guild_members WHERE user_id = :userId',
       forumPosts: 'SELECT * FROM forum_posts WHERE user_id = :userId',
       forumComments: 'SELECT * FROM forum_comments WHERE user_id = :userId',
@@ -67,9 +73,15 @@ exports.exportUserData = async (req, res, next) => {
         SELECT * FROM direct_messages
         WHERE sender_id = :userId OR recipient_id = :userId
         ORDER BY created_at DESC
+        LIMIT 10000
       `,
       workspaces: 'SELECT * FROM strategy_workspaces WHERE user_id = :userId',
-      sessions: 'SELECT * FROM strategy_sessions WHERE user_id = :userId ORDER BY created_at DESC',
+      sessions: `
+        SELECT * FROM strategy_sessions 
+        WHERE user_id = :userId 
+        ORDER BY created_at DESC 
+        LIMIT 1000
+      `,
       workouts: 'SELECT * FROM workouts WHERE user_id = :userId',
       nutritionLogs: 'SELECT * FROM nutrition_logs WHERE user_id = :userId',
       bodyMeasurements: 'SELECT * FROM body_measurements WHERE user_id = :userId',
@@ -79,17 +91,41 @@ exports.exportUserData = async (req, res, next) => {
       subscriptions: 'SELECT * FROM subscriptions WHERE user_id = :userId',
       payments: 'SELECT * FROM payments WHERE user_id = :userId',
       invoices: 'SELECT * FROM invoices WHERE user_id = :userId',
-      analyticsEvents: 'SELECT * FROM analytics_events WHERE user_id = :userId ORDER BY created_at DESC',
-      userSessions: 'SELECT * FROM user_sessions WHERE user_id = :userId ORDER BY started_at DESC',
-      notifications: 'SELECT * FROM notifications WHERE user_id = :userId ORDER BY created_at DESC',
+      analyticsEvents: `
+        SELECT * FROM analytics_events 
+        WHERE user_id = :userId 
+        ORDER BY created_at DESC 
+        LIMIT 10000
+      `,
+      userSessions: `
+        SELECT * FROM user_sessions 
+        WHERE user_id = :userId 
+        ORDER BY started_at DESC 
+        LIMIT 1000
+      `,
+      notifications: `
+        SELECT * FROM notifications 
+        WHERE user_id = :userId 
+        ORDER BY created_at DESC 
+        LIMIT 5000
+      `,
       leaderboards: 'SELECT * FROM leaderboards WHERE user_id = :userId',
     };
 
-    const results = {};
-    for (const [key, query] of Object.entries(queries)) {
-      // eslint-disable-next-line no-await-in-loop
-      results[key] = await fetchRows(query, userId);
-    }
+    // Execute all queries in parallel for better performance
+    const queryPromises = Object.entries(queries).map(async ([key, query]) => {
+      try {
+        const rows = await fetchRows(query, userId);
+        return [key, rows];
+      } catch (error) {
+        // Log error but don't fail entire export if one table is missing
+        logger.warn(`Failed to fetch ${key} for user ${userId}:`, error.message);
+        return [key, []];
+      }
+    });
+
+    const resultsArray = await Promise.all(queryPromises);
+    const results = Object.fromEntries(resultsArray);
 
     const exportPayload = {
       meta: {

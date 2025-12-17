@@ -20,7 +20,7 @@ const ACTION_VERBS = [
 ];
 
 const REQUIRED_FIELDS = {
-  hero_class: ['painPoints', 'aspirations'],
+  hero_class: ['targetAudience', 'painPoints', 'aspirations'],
   loot_table: ['freeRelic', 'potion', 'coreQuest', 'raid'],
   propaganda: ['originMyth', 'coreValues'],
   threat_analysis: ['competitors', 'differentiationStrategy'],

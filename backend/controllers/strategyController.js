@@ -435,7 +435,7 @@ exports.generateStrategy = async (req, res, next) => {
         terminalType,
         issues: validation.issues
       });
-      throw new AppError(`AI response incomplete: ${validation.issues.join('; ')}`, 502, 'AI_RESPONSE_INVALID');
+      throw new AppError(`AI response incomplete: ${validation.issues.join('; ')}`, 422, 'AI_RESPONSE_INVALID');
     }
 
     // Save session
@@ -615,6 +615,12 @@ exports.exportWorkspace = async (req, res, next) => {
     const { id } = req.params;
     const format = (req.query.format || 'json').toLowerCase();
 
+    // Validate format parameter
+    const validFormats = ['json', 'markdown', 'md', 'pdf'];
+    if (!validFormats.includes(format)) {
+      throw new AppError(`Invalid format. Must be one of: ${validFormats.join(', ')}`, 400, 'INVALID_FORMAT');
+    }
+
     const [rows] = await sequelize.query(`
       SELECT *
       FROM strategy_workspaces
@@ -680,7 +686,7 @@ exports.offlineForm = (req, res) => {
   <body>
     <h1>LEGION // Offline Strategy Forge</h1>
     <p class="hint">JavaScript-free mode. Submit this form to receive a plain-text strategy brief.</p>
-    <form method="post" action="/api/${process.env.API_VERSION || 'v1'}/strategy/offline">
+    <form method="post" action="offline">
       <label for="targetAvatar">Target Avatar</label>
       <textarea id="targetAvatar" name="targetAvatar" required placeholder="Describe your ideal client..."></textarea>
 
@@ -703,9 +709,15 @@ exports.offlineForm = (req, res) => {
  */
 exports.offlineAnalysis = async (req, res, next) => {
   try {
-    const targetAvatar = req.body.targetAvatar || '';
-    const transformationGoals = req.body.transformationGoals || '';
-    const uniqueMethod = req.body.uniqueMethod || '';
+    // Input validation and sanitization
+    const targetAvatar = (req.body.targetAvatar || '').trim().slice(0, 2000);
+    const transformationGoals = (req.body.transformationGoals || '').trim().slice(0, 2000);
+    const uniqueMethod = (req.body.uniqueMethod || '').trim().slice(0, 2000);
+
+    // Basic validation
+    if (!targetAvatar || !transformationGoals) {
+      throw new AppError('Target avatar and transformation goals are required', 400, 'INVALID_INPUT');
+    }
 
     const analysis = buildOfflineAnalysis(targetAvatar, transformationGoals, uniqueMethod);
     const payload = {
