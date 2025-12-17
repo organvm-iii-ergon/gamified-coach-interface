@@ -18,8 +18,8 @@ This section defines the standard headers to be used in all files.
 ## PROJECT DOCUMENTATION & CONTEXT SYSTEM
 
 This section describes how documentation is structured and accessed.
-- Repository structure and cleanup plans are documented in `docs/REPO_STRUCTURE.md`.
-- Steps to achieve a working prototype are tracked in `docs/WORKING_PROTOTYPE_CHECKLIST.md`.
+- The repository organization blueprint is located in `docs/REPO_STRUCTURE.md`, detailing the current layout, pain points, proposed structure, and migration steps.
+- The working prototype checklist can be found in `docs/WORKING_PROTOTYPE_CHECKLIST.md`, containing a step-by-step guide.
 
 ## CODING STANDARDS
 
@@ -31,6 +31,7 @@ Follow PEP 8 guidelines.
 - Address syntax errors first. Always address syntax errors first.
 - Type checking warnings may arise due to missing packages. Ensure all necessary packages are installed.
 - Unused variables should be removed or used to avoid clutter.
+- When using npm as the preferred package manager, resolve lockfile conflicts by deleting the lockfiles that don't match your preferred package manager.
 
 ## WORKFLOW & RELEASE RULES
 
@@ -42,5 +43,4 @@ Follow PEP 8 guidelines.
 - Keep `prototypes/` read-only until feature parity is confirmed in `apps/frontend`.
 
 ## BEST PRACTICES
-
-- Create a `.env` file in the root directory with placeholders for environment variables like `VITE_GEMINI_API_KEY`, and `VITE_BACKEND_URL`.
+- Frontend environment variables should be stored in `.env` at the root of the repository. This file should include placeholders for `VITE_GEMINI_API_KEY`, `VITE_BACKEND_URL`, and `VITE_APP_PORT`.
