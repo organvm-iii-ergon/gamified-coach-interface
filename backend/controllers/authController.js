@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
 const { AppError } = require('../middleware/errorHandler');
 const User = require('../models/User');
 const logger = require('../utils/logger');
@@ -33,15 +34,18 @@ const generateRefreshToken = (user) => {
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorMessages = errors.array().map(err => err.msg).join(', ');
+      throw new AppError(errorMessages, 400, 'VALIDATION_ERROR');
+    }
+
     const { email, password, username, firstName, lastName } = req.body;
 
     // Validation
     if (!email || !password || !username) {
       throw new AppError('Please provide email, password, and username', 400, 'MISSING_FIELDS');
-    }
-
-    if (password.length < 8) {
-      throw new AppError('Password must be at least 8 characters', 400, 'WEAK_PASSWORD');
     }
 
     // Check if user exists
@@ -98,6 +102,13 @@ exports.register = async (req, res, next) => {
 // @access  Public
 exports.login = async (req, res, next) => {
   try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorMessages = errors.array().map(err => err.msg).join(', ');
+      throw new AppError(errorMessages, 400, 'VALIDATION_ERROR');
+    }
+
     const { email, password } = req.body;
 
     // Validation
