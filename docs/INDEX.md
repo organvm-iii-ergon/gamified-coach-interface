@@ -27,6 +27,7 @@ This index provides a comprehensive map of all documentation in the Gamified Coa
 | Document | Purpose |
 |----------|---------|
 | [NORTH_STAR.md](NORTH_STAR.md) | Project vision, goals, and long-term direction |
+| [COMPREHENSIVE_CRITICAL_ANALYSIS.md](COMPREHENSIVE_CRITICAL_ANALYSIS.md) | **Exhaustive 9-dimensional analysis: critique, logic, logos, pathos, ethos, blindspots, shatter-points, bloom, evolve** |
 | [USAGE.md](USAGE.md) | Detailed usage instructions for all features |
 | [REPO_STRUCTURE.md](REPO_STRUCTURE.md) | Repository organization blueprint and migration plan |
 | [WORKING_PROTOTYPE_CHECKLIST.md](WORKING_PROTOTYPE_CHECKLIST.md) | Development roadmap and checklist |
@@ -104,17 +105,19 @@ Raw source documents and reference materials used in project development.
 ### For Product/Project Managers
 
 1. [NORTH_STAR.md](NORTH_STAR.md) - Project vision
-2. [operational/STATUS.md](operational/STATUS.md) - Current status
-3. [operational/TODO.md](operational/TODO.md) - Task list
-4. [WORKING_PROTOTYPE_CHECKLIST.md](WORKING_PROTOTYPE_CHECKLIST.md) - Development roadmap
-5. [research/](research/) - Market research
+2. [COMPREHENSIVE_CRITICAL_ANALYSIS.md](COMPREHENSIVE_CRITICAL_ANALYSIS.md) - Complete project analysis
+3. [operational/STATUS.md](operational/STATUS.md) - Current status
+4. [operational/TODO.md](operational/TODO.md) - Task list
+5. [WORKING_PROTOTYPE_CHECKLIST.md](WORKING_PROTOTYPE_CHECKLIST.md) - Development roadmap
+6. [research/](research/) - Market research
 
 ### For Researchers/Strategists
 
-1. [research/legionCommandCenter-fitnessNicheResearch_Gemini.md](research/legionCommandCenter-fitnessNicheResearch_Gemini.md) - Niche research
-2. [research/legionCommandCenter-applicationDrafts_Gemini.md](research/legionCommandCenter-applicationDrafts_Gemini.md) - Application concepts
-3. [NORTH_STAR.md](NORTH_STAR.md) - Strategic vision
-4. [source-documents/](source-documents/) - Reference materials
+1. [COMPREHENSIVE_CRITICAL_ANALYSIS.md](COMPREHENSIVE_CRITICAL_ANALYSIS.md) - Exhaustive project analysis
+2. [research/legionCommandCenter-fitnessNicheResearch_Gemini.md](research/legionCommandCenter-fitnessNicheResearch_Gemini.md) - Niche research
+3. [research/legionCommandCenter-applicationDrafts_Gemini.md](research/legionCommandCenter-applicationDrafts_Gemini.md) - Application concepts
+4. [NORTH_STAR.md](NORTH_STAR.md) - Strategic vision
+5. [source-documents/](source-documents/) - Reference materials
 
 ### For Security Researchers
 
