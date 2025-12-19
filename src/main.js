@@ -95,6 +95,9 @@ class LegionCommandCenter {
     }
 
     openTerminal(nodeId) {
+        // Store focused element to restore later
+        this.previousActiveElement = document.activeElement;
+
         const modal = document.getElementById('terminal-modal');
         const title = document.getElementById('terminal-title');
         const content = document.getElementById('terminal-content');
@@ -111,6 +114,12 @@ class LegionCommandCenter {
         // Show modal
         modal.classList.add('active');
 
+        // Move focus to close button for accessibility
+        const closeBtn = document.getElementById('close-terminal');
+        if (closeBtn) {
+            closeBtn.focus();
+        }
+
         // Setup terminal-specific event listeners
         this.setupTerminalListeners(nodeId);
     }
@@ -118,6 +127,12 @@ class LegionCommandCenter {
     closeTerminal() {
         const modal = document.getElementById('terminal-modal');
         modal.classList.remove('active');
+
+        // Restore focus
+        if (this.previousActiveElement) {
+            this.previousActiveElement.focus();
+            this.previousActiveElement = null;
+        }
 
         // Deactivate node
         this.sceneManager.getOrbitalNodes().deactivateNode();
