@@ -9,7 +9,8 @@ A comprehensive gamified fitness coaching platform featuring:
 
 **For Hiring Managers & Decision Makers:** This repository includes comprehensive resources for creating a professional portfolio video that explains the project in business terms without requiring code literacy.
 
-- **📹 [Video Production Guide](VIDEO_PRODUCTION_README.md)** - Complete guide to producing a hiring-focused portfolio video
+- **⚡ [Quick Start Guide](QUICK_START_VIDEO.md)** - Start here! 5-minute overview and action plan
+- **📹 [Video Production Guide](VIDEO_PRODUCTION_README.md)** - Complete step-by-step production guide
 - **📝 [Full Video Script & Assets](HIRING_PORTFOLIO_VIDEO.md)** - Executive hook, narration script, visual plan, and B-roll prompts
 - **⚙️ [Configuration Template](.video-config.env.example)** - Customizable environment variables for video production
 
