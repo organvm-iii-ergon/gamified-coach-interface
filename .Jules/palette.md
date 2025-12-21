@@ -5,3 +5,7 @@
 ## 2024-05-24 - [Keyboard Accessibility for Custom Controls]
 **Learning:** `div` elements used as interactive controls are invisible to keyboard users and screen readers unless explicitly marked with `role="button"`, `tabindex="0"`, and keyboard event handlers.
 **Action:** Always add semantic roles, tabindex, and `keydown` listeners (Enter/Space) when creating custom interactive elements from non-semantic tags.
+
+## 2024-05-25 - [Form Accessibility]
+**Learning:** Labels in dynamically generated forms often miss the `for` attribute, breaking the connection with inputs for screen readers.
+**Action:** Explicitly add `for="[inputId]"` to all label elements in template strings.
