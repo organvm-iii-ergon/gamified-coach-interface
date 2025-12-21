@@ -192,7 +192,13 @@ io.on('connection', (socket) => {
   socket.on('guild_message', async (data) => {
     try {
       const { guildId, message } = data;
+
       // Verify user is member of guild
+      if (!socket.user?.guilds?.includes(guildId)) {
+        logger.warn(`User ${socket.user.id} attempted to send message to non-member guild ${guildId}`);
+        return socket.emit('error', { message: 'You are not a member of this guild' });
+      }
+
       // Save message
       // Broadcast to guild
       io.to(`guild:${guildId}`).emit('new_guild_message', {
