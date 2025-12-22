@@ -192,7 +192,14 @@ io.on('connection', (socket) => {
   socket.on('guild_message', async (data) => {
     try {
       const { guildId, message } = data;
+
       // Verify user is member of guild
+      // Check if guildId is in user's guilds array (handling type mismatch)
+      const isMember = socket.user.guilds.some(id => String(id) === String(guildId));
+      if (!isMember) {
+        throw new Error('Not authorized to post in this guild');
+      }
+
       // Save message
       // Broadcast to guild
       io.to(`guild:${guildId}`).emit('new_guild_message', {
