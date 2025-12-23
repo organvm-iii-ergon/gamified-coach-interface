@@ -16,6 +16,7 @@ import sys
 import json
 import logging
 import re
+import shlex
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
@@ -28,6 +29,14 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Constants
+WORDS_PER_MINUTE = 150  # Standard speaking rate for narration
+DEFAULT_FONT_PATHS = [
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',  # Linux
+    '/System/Library/Fonts/Helvetica.ttc',  # macOS
+    'C:/Windows/Fonts/Arial.ttf',  # Windows
+]
 
 
 @dataclass
@@ -129,9 +138,9 @@ class ScriptParser:
                         timecode_match = re.search(r'\[(\d+:\d+-\d+:\d+)\]', title)
                         timecode = timecode_match.group(1) if timecode_match else None
                         
-                        # Estimate duration based on word count (150 words per minute)
+                        # Estimate duration based on word count
                         word_count = len(scene_content.split())
-                        duration = (word_count / 150) * 60  # seconds
+                        duration = (word_count / WORDS_PER_MINUTE) * 60  # seconds
                         
                         scenes.append(ScriptScene(
                             index=scene_index,
@@ -154,7 +163,7 @@ class ScriptParser:
         for idx, paragraph in enumerate(paragraphs):
             if len(paragraph) > 20:  # Minimum content length
                 word_count = len(paragraph.split())
-                duration = (word_count / 150) * 60
+                duration = (word_count / WORDS_PER_MINUTE) * 60
                 
                 # Use first 50 chars as title
                 title = paragraph[:50] + "..." if len(paragraph) > 50 else paragraph
@@ -225,7 +234,7 @@ class AudioGenerator:
             'espeak',
             '-f', str(temp_text),
             '-w', str(output_path),
-            '-s', '150',  # Speed: 150 words per minute
+            '-s', str(WORDS_PER_MINUTE),  # Speed: words per minute
             '-v', 'en-us'  # US English voice
         ]
         
@@ -245,7 +254,7 @@ class AudioGenerator:
             raise ImportError("pyttsx3 not installed. Install with: pip install pyttsx3")
         
         engine = pyttsx3.init()
-        engine.setProperty('rate', 150)  # 150 words per minute
+        engine.setProperty('rate', WORDS_PER_MINUTE)  # Words per minute
         engine.save_to_file(text, str(output_path))
         engine.runAndWait()
     
@@ -254,12 +263,16 @@ class AudioGenerator:
         cmd = [
             'ffmpeg', '-y',
             '-f', 'lavfi',
-            '-i', f'anullsrc=r=44100:cl=stereo',
+            '-i', 'anullsrc=r=44100:cl=stereo',
             '-t', str(int(duration)),
             '-acodec', 'pcm_s16le',
             str(output_path)
         ]
-        subprocess.run(cmd, capture_output=True, check=True)
+        try:
+            subprocess.run(cmd, capture_output=True, check=True, text=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Silent audio generation failed: {e.stderr}")
+            raise
         logger.warning(f"Generated silent audio: {output_path}")
         return output_path
 
@@ -269,6 +282,27 @@ class VisualGenerator:
     
     def __init__(self, config: VideoConfig):
         self.config = config
+        self.font_path = self._detect_font()
+    
+    def _detect_font(self) -> str:
+        """Detect available font on the system."""
+        for font_path in DEFAULT_FONT_PATHS:
+            if Path(font_path).exists():
+                logger.info(f"Using font: {font_path}")
+                return font_path
+        
+        # Fallback: try to find any TrueType font
+        logger.warning("No standard fonts found, attempting to find any TTF font")
+        for font_dir in ['/usr/share/fonts', '/System/Library/Fonts', 'C:/Windows/Fonts']:
+            font_dir_path = Path(font_dir)
+            if font_dir_path.exists():
+                for font_file in font_dir_path.rglob('*.ttf'):
+                    logger.info(f"Using fallback font: {font_file}")
+                    return str(font_file)
+        
+        # Last resort: use FFmpeg default (no fontfile parameter)
+        logger.warning("No fonts found, using FFmpeg default font")
+        return ""
     
     def generate_visuals(self, job: VideoJob) -> List[Path]:
         """
@@ -324,14 +358,21 @@ class VisualGenerator:
             # Use FFmpeg to create a title card video
             duration = max(scene.duration_estimate, 3.0)  # Minimum 3 seconds
             
-            # Clean title text for display
-            title_text = scene.title.replace("'", "\\'").replace('"', '\\"')[:80]
+            # Sanitize title text - remove quotes and limit length
+            # Use only safe characters and escape for FFmpeg text filter
+            title_text = re.sub(r'[^\w\s\-.,!?]', '', scene.title)[:80]
+            title_text = title_text.replace("'", "").replace('"', '').replace('\\', '')
+            
+            # Build FFmpeg command with proper escaping
+            drawtext_filter = f"drawtext=text='{title_text}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2"
+            if self.font_path:
+                drawtext_filter += f":fontfile={self.font_path}"
             
             cmd = [
                 'ffmpeg', '-y',
                 '-f', 'lavfi',
                 '-i', f'color=c=0x0a0a1a:s={width}x{height}:r={self.config.fps}',
-                '-vf', f"drawtext=text='{title_text}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                '-vf', drawtext_filter,
                 '-t', str(duration),
                 '-pix_fmt', 'yuv420p',
                 str(clip_path)
@@ -351,17 +392,30 @@ class VisualGenerator:
         """Generate a single impact/metric card."""
         width, height = map(int, self.config.video_resolution.split('x'))
         
+        # Sanitize text for FFmpeg
+        safe_text = re.sub(r'[^\w\s\-.,!?]', '', text)[:100]
+        safe_text = safe_text.replace("'", "").replace('"', '').replace('\\', '')
+        
+        # Build FFmpeg command with proper escaping
+        drawtext_filter = f"drawtext=text='{safe_text}':fontcolor=0x0a0a1a:fontsize=64:x=(w-text_w)/2:y=(h-text_h)/2"
+        if self.font_path:
+            drawtext_filter += f":fontfile={self.font_path}"
+        
         cmd = [
             'ffmpeg', '-y',
             '-f', 'lavfi',
             '-i', f'color=c=0x00f5ff:s={width}x{height}:r={self.config.fps}',
-            '-vf', f"drawtext=text='{text}':fontcolor=0x0a0a1a:fontsize=64:x=(w-text_w)/2:y=(h-text_h)/2:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+            '-vf', drawtext_filter,
             '-t', str(duration),
             '-pix_fmt', 'yuv420p',
             str(output_path)
         ]
         
-        subprocess.run(cmd, capture_output=True, check=True)
+        try:
+            subprocess.run(cmd, capture_output=True, check=True, text=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Impact card generation failed: {e.stderr}")
+            raise
 
 
 class VideoRenderer:

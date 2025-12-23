@@ -135,6 +135,7 @@ This project is well-documented with clear structure:
 - **🔒 [Security Policy](SECURITY.md)** - Vulnerability reporting
 - **📋 [Repository Structure](docs/REPO_STRUCTURE.md)** - Repository organization
 - **✅ [Working Prototype Checklist](docs/WORKING_PROTOTYPE_CHECKLIST.md)** - Development roadmap
+- **🎬 [Video Production System](docs/VIDEO_PRODUCTION_SYSTEM.md)** - Automated video generation documentation
 
 Frontend environment variables now live in `.env` (Gemini key + backend URL). Copy and fill it before running `npm run dev`.
 
