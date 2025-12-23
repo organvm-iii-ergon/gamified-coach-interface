@@ -9,10 +9,16 @@ A comprehensive gamified fitness coaching platform featuring:
 
 **For Hiring Managers & Decision Makers:** This repository includes comprehensive resources for creating a professional portfolio video that explains the project in business terms without requiring code literacy.
 
+### Manual Video Production
 - **⚡ [Quick Start Guide](QUICK_START_VIDEO.md)** - Start here! 5-minute overview and action plan
 - **📹 [Video Production Guide](VIDEO_PRODUCTION_README.md)** - Complete step-by-step production guide
 - **📝 [Full Video Script & Assets](HIRING_PORTFOLIO_VIDEO.md)** - Executive hook, narration script, visual plan, and B-roll prompts
 - **⚙️ [Configuration Template](.video-config.env.example)** - Customizable environment variables for video production
+
+### Automated Video Production
+- **🤖 [Automated Video Production System](scripts/video_production/README.md)** - Fully automated video generation from scripts
+- **🚀 Quick Start**: `./scripts/produce_videos.sh` - Generate videos automatically from markdown scripts
+- **⚙️ [Production Config](.video-production.env.example)** - Environment variables for automated production
 
 These resources demonstrate how to translate technical work into strategic narratives for executive audiences.
 
@@ -129,6 +135,7 @@ This project is well-documented with clear structure:
 - **🔒 [Security Policy](SECURITY.md)** - Vulnerability reporting
 - **📋 [Repository Structure](docs/REPO_STRUCTURE.md)** - Repository organization
 - **✅ [Working Prototype Checklist](docs/WORKING_PROTOTYPE_CHECKLIST.md)** - Development roadmap
+- **🎬 [Video Production System](docs/VIDEO_PRODUCTION_SYSTEM.md)** - Automated video generation documentation
 
 Frontend environment variables now live in `.env` (Gemini key + backend URL). Copy and fill it before running `npm run dev`.
 
