@@ -5,6 +5,17 @@ A comprehensive gamified fitness coaching platform featuring:
 - **V2 Retro Interface**: Pixel RPG-style coaching dashboard
 - **Document Analysis System**: Python-based strategic document ingestion and analysis
 
+## 🎬 Portfolio Video Resources
+
+**For Hiring Managers & Decision Makers:** This repository includes comprehensive resources for creating a professional portfolio video that explains the project in business terms without requiring code literacy.
+
+- **⚡ [Quick Start Guide](QUICK_START_VIDEO.md)** - Start here! 5-minute overview and action plan
+- **📹 [Video Production Guide](VIDEO_PRODUCTION_README.md)** - Complete step-by-step production guide
+- **📝 [Full Video Script & Assets](HIRING_PORTFOLIO_VIDEO.md)** - Executive hook, narration script, visual plan, and B-roll prompts
+- **⚙️ [Configuration Template](.video-config.env.example)** - Customizable environment variables for video production
+
+These resources demonstrate how to translate technical work into strategic narratives for executive audiences.
+
 ## 🚀 Quick Start - Legion Command Center V3
 
 ### Requirements
@@ -108,10 +119,19 @@ gamified-coach-interface/
 
 ```
 
-### Organization & cleanup
-- A living blueprint for the repo layout and proposed moves lives in `docs/REPO_STRUCTURE.md`.
-- The step-by-step path to a working prototype is tracked in `docs/WORKING_PROTOTYPE_CHECKLIST.md`.
-- Frontend environment variables now live in `.env` (Gemini key + backend URL). Copy and fill it before running `npm run dev`.
+### Documentation & Organization
+
+This project is well-documented with clear structure:
+
+- **📖 [Documentation Index](docs/INDEX.md)** - Complete documentation map
+- **🔍 [Comprehensive Critical Analysis](docs/COMPREHENSIVE_CRITICAL_ANALYSIS.md)** - Exhaustive 9-dimensional project analysis
+- **🏗️ [Architecture Guide](ARCHITECTURE.md)** - Project structure and architecture
+- **🤝 [Contributing Guide](CONTRIBUTING.md)** - How to contribute
+- **🔒 [Security Policy](SECURITY.md)** - Vulnerability reporting
+- **📋 [Repository Structure](docs/REPO_STRUCTURE.md)** - Repository organization
+- **✅ [Working Prototype Checklist](docs/WORKING_PROTOTYPE_CHECKLIST.md)** - Development roadmap
+
+Frontend environment variables now live in `.env` (Gemini key + backend URL). Copy and fill it before running `npm run dev`.
 
 ## 🛠️ Build for Production
 
@@ -208,21 +228,37 @@ Based on the document analysis, the recommended development phases are:
 4. **Gamification**: Achievement systems and challenges
 5. **Business Integration**: Payments, communication, and analytics
 
-## Contributing
+## 🤝 Contributing
 
-This is a document analysis tool for the gamified fitness coaching interface project. To contribute:
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information on:
 
-1. Ensure Python 3.11+ is installed
-2. Install dependencies: `pip install -r requirements.txt`
-3. Make your changes
-4. Test the analysis script: `python3 analyze_docs.py`
+- Development setup and workflow
+- Code style and standards
+- Testing requirements
+- Pull request process
+- Issue reporting guidelines
+
+Also review:
+- [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
+- [Architecture Guide](ARCHITECTURE.md) - Project structure
+- [Documentation Index](docs/INDEX.md) - Find relevant docs
+
+### Quick Contribution Steps
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make your changes following our coding standards
+4. Test your changes
 5. Submit a pull request
 
-## License
+## 📄 License
 
-See repository license file for details.
-No license file is currently included in this repository. Please contact the repository owner for licensing information.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact
+## 📞 Contact & Support
 
-For questions or suggestions about the document analysis system, please open an issue in the repository.
+- **Issues**: [Report bugs or request features](https://github.com/ivviiviivvi/gamified-coach-interface/issues)
+- **Security**: [Report vulnerabilities](SECURITY.md) responsibly
+- **Discussions**: Open a GitHub Discussion for questions and ideas
+
+For questions about the document analysis system, please open an issue with the "documentation" label.
