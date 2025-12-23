@@ -194,9 +194,8 @@ io.on('connection', (socket) => {
       const { guildId, message } = data;
 
       // Verify user is member of guild
-      if (!socket.user?.guilds?.includes(guildId)) {
-        logger.warn(`User ${socket.user.id} attempted to send message to non-member guild ${guildId}`);
-        return socket.emit('error', { message: 'You are not a member of this guild' });
+      if (!socket.user?.guilds || !socket.user.guilds.includes(guildId)) {
+        throw new Error('NOT_AUTHORIZED_GUILD');
       }
 
       // Save message
@@ -208,7 +207,10 @@ io.on('connection', (socket) => {
         timestamp: new Date()
       });
     } catch (error) {
-      socket.emit('error', { message: 'Failed to send guild message' });
+      const errorMessage = error.message === 'NOT_AUTHORIZED_GUILD'
+        ? 'You are not a member of this guild'
+        : 'Failed to send guild message';
+      socket.emit('error', { message: errorMessage });
     }
   });
 
