@@ -9,3 +9,7 @@
 ## 2024-05-25 - [Modal Focus Management]
 **Learning:** Modals triggered by buttons must manage focus explicitly: move focus into the modal on open, and restore it to the trigger on close, or the keyboard navigation flow is broken.
 **Action:** Store `document.activeElement` before opening a modal, focus a close button/first input inside, and restore focus on close.
+
+## 2024-05-26 - [Dynamic ARIA Updates]
+**Learning:** Progress bars and other dynamic indicators must update `aria-valuenow` in real-time to be accessible to screen readers; static roles are not enough.
+**Action:** When animating a value (like width or position), always pair it with `setAttribute('aria-valuenow', value)`.

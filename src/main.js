@@ -5,7 +5,7 @@ import { SceneManager } from './SceneManager.js';
  * Handles boot sequence, UI interactions, and API integration
  */
 
-class LegionCommandCenter {
+export class LegionCommandCenter {
     constructor() {
         this.sceneManager = null;
         this.currentTerminal = null;
@@ -31,6 +31,7 @@ class LegionCommandCenter {
     async bootSequence() {
         const bootScreen = document.getElementById('boot-screen');
         const bootBar = document.getElementById('boot-bar');
+        const bootProgress = document.getElementById('boot-progress-container');
 
         return new Promise((resolve) => {
             let progress = 0;
@@ -38,7 +39,12 @@ class LegionCommandCenter {
                 progress += Math.random() * 15;
                 if (progress > 100) progress = 100;
 
-                bootBar.style.width = progress + '%';
+                if (bootBar) {
+                    bootBar.style.width = progress + '%';
+                }
+                if (bootProgress) {
+                    bootProgress.setAttribute('aria-valuenow', Math.round(progress));
+                }
 
                 if (progress === 100) {
                     clearInterval(interval);
