@@ -8,6 +8,14 @@
 
 # Gamified Coach Interface
 
+[![CI](https://github.com/organvm-iii-ergon/gamified-coach-interface/actions/workflows/ci.yml/badge.svg)](https://github.com/organvm-iii-ergon/gamified-coach-interface/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-pending-lightgrey)](https://github.com/organvm-iii-ergon/gamified-coach-interface)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/organvm-iii-ergon/gamified-coach-interface/blob/main/LICENSE)
+[![Organ III](https://img.shields.io/badge/Organ-III%20Ergon-F59E0B)](https://github.com/organvm-iii-ergon)
+[![Status](https://img.shields.io/badge/status-active-brightgreen)](https://github.com/organvm-iii-ergon/gamified-coach-interface)
+[![TypeScript](https://img.shields.io/badge/lang-TypeScript-informational)](https://github.com/organvm-iii-ergon/gamified-coach-interface)
+
+
 ### Legion Command Center — A 3D Holographic Coaching Platform for Fitness Entrepreneurs
 
 *Transform fitness coaching from transactional service delivery into an immersive strategic experience where coaches become commanders and clients become heroes in their own transformation story.*
